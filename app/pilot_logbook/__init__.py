@@ -54,10 +54,13 @@ class PilotLogBook:
     def _get_formula(self, key: str, row_index: int):
         formula_dict = {
             "glider_model": f"""=IF(G{row_index}="";"";XLOOKUP(G{row_index};'Aircraft model'!$B$1:$B$1000;'Aircraft model'!$A$1:$A$1000;""))""",
-            "total_time_flights": f'=IF(E{row_index}>0;E{row_index}-C{row_index};"")',
-            "pic_time": f"""=IF(K{row_index}='Summary Glider'!$B$1;E{row_index}-C{row_index};"")""",
-            "dual_time": f"""=IF(K{row_index}='Summary Glider'!$B$1;"";IF(L{row_index}='Summary Glider'!$B$1;E{row_index}-C{row_index};""))""",
-            "instructor_time": f"""=IF(M{row_index}=TRUE;E{row_index}-C{row_index};"")""",
+            "total_time_flights": f'=IF(G{row_index}>0;I{row_index}-G{row_index};"")',
+            # "pic_time": f"""=IF(K{row_index}='Summary Glider'!$B$1;E{row_index}-C{row_index};"")""",
+            # "dual_time": f"""=IF(K{row_index}='Summary Glider'!$B$1;"";IF(L{row_index}='Summary Glider'!$B$1;E{row_index}-C{row_index};""))""",
+            # "instructor_time": f"""=IF(M{row_index}=TRUE;E{row_index}-C{row_index};"")""",
+            "pic_time": f"""=IF(B{row_index}='Summary Glider'!$B$1,I{row_index}-G{row_index},"")""",
+            "dual_time": f"""=IF(B{row_index}='Summary Glider'!$B$1,"",IF(C{row_index}='Summary Glider'!$B$1,I{row_index}-G{row_index},""))""",
+            "instructor_time": f"""=IF(M2=TRUE,I{row_index}-G{row_index},"")""",
         }
         return formula_dict.get(key, "")
 
@@ -119,20 +122,30 @@ class PilotLogBook:
             is_instructor = False
         if is_instructor is True and name_p2 == self.pilot_name:
             is_instructor = False
+
+        # Date (yyyy-mm-dd)	
+        # Name PIC	
+        # Name P2	Glider		
+        # Departure		
+        # Arrival		
+        # Total time of flight	
+        # Type of launch	
+        # Landings	
+        # Instructor
         data = [
             d,
+            name_p1,
+            name_p2,
             departure_place,
             departure_time,
             arrival_place,
             arrival_time,
-            self._get_formula("glider_model", row_index),
-            glider_registration,
+            self._get_formula("total_time_flights", row_index),
             type_of_launch,
             landings,
-            self._get_formula("total_time_flights", row_index),
-            name_p1,
-            name_p2,
             is_instructor,
+            self._get_formula("glider_model", row_index),
+            glider_registration,
             self._get_formula("pic_time", row_index),
             self._get_formula("dual_time", row_index),
             self._get_formula("instructor_time", row_index),
