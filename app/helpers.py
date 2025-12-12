@@ -1,5 +1,6 @@
 from datetime import datetime, time, date
 from typing import Union
+import pandas as pd
 
 
 def normalize_flight_time(value) -> str:
@@ -74,9 +75,33 @@ def normalize_date(dt: Union[str, datetime]):
     return dt.strftime("%Y-%m-%d")
 
 
-def normalize_time(dt: str):
+def normalize_time(dt):
     """
-    1899-12-30 14:21:00
+    Converts Access/Excel datetime/Timestamp/string to HH:MM
     """
-    dt = datetime.strptime(dt, "%Y-%m-%d %H:%M:%S")
-    return dt.strftime("%H:%M")
+    if dt is None or pd.isna(dt):
+        return None
+
+    # If it's already datetime or Timestamp
+    if isinstance(dt, (datetime, pd.Timestamp)):
+        return dt.strftime("%H:%M")
+
+    # If it's a string → try to parse
+    if isinstance(dt, str):
+        # List of acceptable formats
+        formats = [
+            "%Y-%m-%d %H:%M:%S",
+            "%Y-%m-%d %H:%M",
+            "%d.%m.%Y %H:%M",
+            "%H:%M",
+        ]
+        for fmt in formats:
+            try:
+                parsed = datetime.strptime(dt, fmt)
+                return parsed.strftime("%H:%M")
+            except ValueError:
+                pass
+        raise ValueError(f"Unrecognized time string: {dt}")
+
+    # Unexpected type
+    raise TypeError(f"normalize_time(): unsupported type {type(dt)} with value {dt}")

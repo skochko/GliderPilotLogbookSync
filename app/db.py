@@ -14,6 +14,7 @@ def read_table_windows(table_name):
     import pyodbc
     db_path = os.getenv("DATABASE_PATH")
     conn = pyodbc.connect(f"DRIVER={{Microsoft Access Driver (*.mdb, *.accdb)}};DBQ={db_path}")
+
     cursor = conn.cursor()
     query = f"SELECT * FROM {table_name}"
     cursor.execute(query)

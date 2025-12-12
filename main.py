@@ -1,6 +1,5 @@
 from tqdm import tqdm
 
-from access_parser import AccessParser
 import pandas as pd
 
 from app.club_members import ClubMembers
