@@ -110,6 +110,7 @@ for member in pbar:
             normalize_time(row["LaunchTime"]),
             PLACE_NAME,
             normalize_time(row["LandTime"]),
+            glider_model,
             glider_registration,
             DEFAULT_LAUNCH_TYPE,
             1,

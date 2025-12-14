@@ -60,16 +60,16 @@ class PilotLogBook:
             # "instructor_time": f"""=IF(M{row_index}=TRUE;E{row_index}-C{row_index};"")""",
             "pic_time": f"""=IF(B{row_index}='Summary Glider'!$B$1,I{row_index}-G{row_index},"")""",
             "dual_time": f"""=IF(B{row_index}='Summary Glider'!$B$1,"",IF(C{row_index}='Summary Glider'!$B$1,I{row_index}-G{row_index},""))""",
-            "instructor_time": f"""=IF(M2=TRUE,I{row_index}-G{row_index},"")""",
+            "instructor_time": f"""=IF(M{row_index}=TRUE,I{row_index}-G{row_index},"")""",
         }
         return formula_dict.get(key, "")
 
     def _make_flight_log_id(self, data: list) -> str:
         d = normalize_flight_date(data[0])
 
-        start_time = normalize_flight_time(data[2])
-        lend_time = normalize_flight_time(data[4])
-        result = f"{d}{data[1]}{start_time}{data[3]}{lend_time}"
+        start_time = normalize_flight_time(data[6])
+        lend_time = normalize_flight_time(data[8])
+        result = f"{d}{data[5]}{start_time}{data[7]}{lend_time}"
         return result
 
     def add_aircraft_model(self, model: str, registration: str) -> bool:
@@ -103,6 +103,7 @@ class PilotLogBook:
         departure_time: str,
         arrival_place: str,
         arrival_time: str,
+        glider_model: str,
         glider_registration: str,
         type_of_launch: str,
         landings: int,
@@ -136,6 +137,9 @@ class PilotLogBook:
             d,
             name_p1,
             name_p2,
+            # self._get_formula("glider_model", row_index),
+            glider_model,
+            glider_registration,
             departure_place,
             departure_time,
             arrival_place,
@@ -144,8 +148,6 @@ class PilotLogBook:
             type_of_launch,
             landings,
             is_instructor,
-            self._get_formula("glider_model", row_index),
-            glider_registration,
             self._get_formula("pic_time", row_index),
             self._get_formula("dual_time", row_index),
             self._get_formula("instructor_time", row_index),

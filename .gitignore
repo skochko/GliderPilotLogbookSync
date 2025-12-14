@@ -212,3 +212,5 @@ keys.json
 *.accdb
 Members.xlsx
 test.py
+dist*
+.DS_Store
