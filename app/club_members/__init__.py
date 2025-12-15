@@ -16,7 +16,7 @@ class ClubMembers:
         idx_club_id = headers.index("Club ID")
         idx_name = headers.index("Name")
         idx_spreadsheet = headers.index("Spreadsheet Key")
-        idx_sync_date = headers.index("Sync Date") if "Sync Date" in headers else None
+        idx_sync_count = headers.index("Sync Count") if "Sync Count" in headers else 0
 
         for row in sheet.iter_rows(min_row=2, values_only=True):
             raw_club_id = row[idx_club_id]
@@ -28,11 +28,8 @@ class ClubMembers:
             spreadsheet_key = str(row[idx_spreadsheet])
 
             sync_date = None
-            if idx_sync_date is not None and row[idx_sync_date] is not None:
-                if isinstance(row[idx_sync_date], date):
-                    sync_date = row[idx_sync_date]
-                else:
-                    sync_date = date.fromisoformat(str(row[idx_sync_date]))
+            if idx_sync_count is not None and row[idx_sync_count] is not None:
+                sync_count = row[idx_sync_count]
 
             member = ClubMemberSchema(
                 club_id=club_id,
@@ -50,5 +47,5 @@ class ClubMembers:
         wb = load_workbook(filename)
         ws = wb["Members"]
         for i, m in enumerate(self.members, start=2):
-            ws[f"D{i}"] = m.sync_date
+            ws[f"D{i}"] = m.sync_count
         wb.save(filename)

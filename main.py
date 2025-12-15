@@ -72,26 +72,19 @@ df_flight_time["DateFlown"] = pd.to_datetime(
 pbar = tqdm(club_members.members, total=len(club_members.members))
 for member in pbar:
     pbar.set_description(f"Sync Logbook for {member.name}")
-    if member.sync_date:
-        pilot_flights = df_flight_time[
-            (
-                (df_flight_time["P1"] == member.club_id)
-                | (df_flight_time["P2"] == member.club_id)
-            )
-            & (df_flight_time["DateFlown"] >= pd.Timestamp(member.sync_date))
-        ]
-    else:
-        pilot_flights = df_flight_time[
-            (df_flight_time["P1"] == member.club_id)
-            | (df_flight_time["P2"] == member.club_id)
-        ]
+    pilot_flights = df_flight_time[
+        (df_flight_time["P1"] == member.club_id)
+        | (df_flight_time["P2"] == member.club_id)
+    ]
+    rows_count = len(pilot_flights)
+    if member.sync_count >= len(pilot_flights):
+        break
     # Sorting by DateFlown, LaunchTime, LandTime
     pilot_flights = pilot_flights.sort_values(
         by=["DateFlown", "LaunchTime", "LandTime"], ascending=[True, True, True]
     )
     pilog_log_book = PilotLogBook(gc, member.spreadsheet_key)
     count = 0
-    _sync_date = member.sync_date
     for _, row in pilot_flights.iterrows():
     # for _, row in tqdm(pilot_flights.iterrows(), total=len(pilot_flights), desc=f"Sync {member.name}"):
         glider_registration = glider_daetails_dict.get(row["GliderID"])
@@ -116,7 +109,6 @@ for member in pbar:
             p1_name,
             p2_name,
         )
-        _sync_date = row["DateFlown"].date()
         if added is True:
             count += 1
     tqdm.write(f"Added {count} rows for {member.name}")
@@ -127,15 +119,16 @@ for member in pbar:
         try:
             pilog_log_book.save_aircraft_model()
             pilog_log_book.save_flight_log_glider()
-            member.sync_date = _sync_date
             tqdm.write(
                 f"Save {count} flight log and aircraft models for {member.name} - saved"
             )
+            tqdm.write(f"Sync count for {member.name} has been updated to {rows_count}")
         except Exception as e:
             tqdm.write(
                 f"Save {count} flight log and aircraft models for {member.name} - error ({e})"
             )
-        tqdm.write(f"Sync date for {member.name} has been updated to {_sync_date}")
+    if member.sync_count != rows_count:
+        member.sync_count = rows_count
         club_members.save()
 
 print("All steps done.")

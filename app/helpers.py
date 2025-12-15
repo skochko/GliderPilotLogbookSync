@@ -21,7 +21,6 @@ DATE_FORMATS = [
 
 
 def get_date_format(list_values: List[str]) -> str:
-    print(list_values)
     for value in list_values:
         if isinstance(value, str):
             for fmt in DATE_FORMATS:
