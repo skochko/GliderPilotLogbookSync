@@ -104,7 +104,7 @@ for member in pbar:
 
         pilog_log_book.add_aircraft_model(glider_model, glider_registration)
         added = pilog_log_book.add_flight_log_glider(
-            normalize_date(row["DateFlown"]),
+            row["DateFlown"],
             PLACE_NAME,
             normalize_time(row["LaunchTime"]),
             PLACE_NAME,

@@ -1,6 +1,36 @@
 from datetime import datetime, time, date
-from typing import Union
+from typing import List, Union
 import pandas as pd
+
+
+DEFAULT_DATE_FORMAT = "%Y-%m-%d"
+
+DATE_FORMATS = [
+    "%Y-%m-%d",
+    "%d/%m/%Y",
+    "%d.%m.%Y",
+    "%d-%m-%Y",
+    "%Y.%m.%d",
+    "%d %b %Y",
+    "%d %B %Y",
+    "%d %b %Y",  # 08 Nov 2025
+    "%d %B %Y",  # 08 November 2025
+    "%Y-%m-%d",  # 2025-11-08
+    "%m/%d/%Y",  # 11/08/2025
+]
+
+
+def get_date_format(list_values: List[str]) -> str:
+    print(list_values)
+    for value in list_values:
+        if isinstance(value, str):
+            for fmt in DATE_FORMATS:
+                try:
+                    datetime.strptime(value, fmt).strftime("%Y-%m-%d")
+                    return fmt
+                except ValueError:
+                    pass
+    return DEFAULT_DATE_FORMAT
 
 
 def normalize_flight_time(value) -> str:
@@ -41,38 +71,23 @@ def normalize_flight_time(value) -> str:
 def normalize_flight_date(value) -> str:
     if isinstance(value, (datetime, date)):
         return value.strftime("%Y-%m-%d")
-
     if isinstance(value, str):
-        # Попробуем несколько частых форматов
-        formats = [
-            "%Y-%m-%d",
-            "%d/%m/%Y",
-            "%d.%m.%Y",
-            "%m/%d/%Y",
-            "%d-%m-%Y",
-            "%Y.%m.%d",
-            "%d %b %Y",
-            "%d %B %Y",
-        ]
-        for fmt in formats:
+        for fmt in DATE_FORMATS:
             try:
                 return datetime.strptime(value, fmt).strftime("%Y-%m-%d")
             except ValueError:
                 pass
-
-    # Если ничего не подошло — последнее спасение
     try:
         return str(datetime.fromisoformat(value).date())
     except:
         pass
-
     return value
 
 
-def normalize_date(dt: Union[str, datetime]):
+def normalize_date(dt: Union[str, datetime], date_format: str):
     if isinstance(dt, str):
         dt = datetime.strptime(dt, "%Y-%m-%d %H:%M:%S")
-    return dt.strftime("%Y-%m-%d")
+    return dt.strftime(date_format)
 
 
 def normalize_time(dt):

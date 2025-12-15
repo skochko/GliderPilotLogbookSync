@@ -1,6 +1,6 @@
 from datetime import date, datetime
-
-from app.helpers import normalize_flight_date, normalize_flight_time
+import pandas as pd
+from app.helpers import get_date_format, normalize_date, normalize_flight_date, normalize_flight_time
 
 
 class PilotLogBook:
@@ -43,6 +43,7 @@ class PilotLogBook:
         self.flight_log_glider = [
             i for i in self.worksheet_flight_gog_glider.get_all_values() if i[0]
         ]
+        self.date_format = get_date_format([i[0] for i in self.flight_log_glider[:10]])
         self.flight_log_id_list = [
             self._make_flight_log_id(i) for i in self.flight_log_glider
         ]
@@ -66,7 +67,6 @@ class PilotLogBook:
 
     def _make_flight_log_id(self, data: list) -> str:
         d = normalize_flight_date(data[0])
-
         start_time = normalize_flight_time(data[6])
         lend_time = normalize_flight_time(data[8])
         result = f"{d}{data[5]}{start_time}{data[7]}{lend_time}"
@@ -98,7 +98,7 @@ class PilotLogBook:
 
     def add_flight_log_glider(
         self,
-        d: date,
+        d: pd.Timestamp,
         departure_place: str,
         departure_time: str,
         arrival_place: str,
@@ -116,7 +116,7 @@ class PilotLogBook:
         is_instructor = False
         if (
             self.instructor_from_date is not None
-            and datetime.strptime(d, "%Y-%m-%d").date() >= self.instructor_from_date
+            and d >= pd.Timestamp(self.instructor_from_date)
         ):
             is_instructor = self.is_instructor
         if is_instructor is True and not name_p2:
@@ -134,7 +134,7 @@ class PilotLogBook:
         # Landings	
         # Instructor
         data = [
-            d,
+            normalize_date(d, self.date_format),
             name_p1,
             name_p2,
             # self._get_formula("glider_model", row_index),
