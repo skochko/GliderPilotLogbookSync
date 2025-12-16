@@ -1,7 +1,10 @@
 from datetime import date, datetime
+import os
 import pandas as pd
 from app.helpers import get_date_format, normalize_date, normalize_flight_date, normalize_flight_time
 
+
+LOGBOOK_FIXED_ROWS = os.getenv("LOGBOOK_FIXED_ROWS", 2)
 
 class PilotLogBook:
     def __init__(self, gc, spreadsheet_key: str):
@@ -49,8 +52,8 @@ class PilotLogBook:
         ]
         self.flight_log_glider_to_add = []
         self.flight_log_glider_to_add_row_index = max(
-            len(self.worksheet_flight_gog_glider.col_values(1)) + 1, 3
-        )
+            len(self.worksheet_flight_gog_glider.col_values(1)), LOGBOOK_FIXED_ROWS
+        ) + 1
 
     def _get_formula(self, key: str, row_index: int):
         formula_dict = {
