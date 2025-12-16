@@ -48,8 +48,8 @@ class PilotLogBook:
             self._make_flight_log_id(i) for i in self.flight_log_glider
         ]
         self.flight_log_glider_to_add = []
-        self.flight_log_glider_to_add_row_index = (
-            len(self.worksheet_flight_gog_glider.col_values(1)) + 1
+        self.flight_log_glider_to_add_row_index = max(
+            len(self.worksheet_flight_gog_glider.col_values(1)) + 1, 3
         )
 
     def _get_formula(self, key: str, row_index: int):
