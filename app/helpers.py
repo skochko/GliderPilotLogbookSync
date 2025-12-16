@@ -6,17 +6,45 @@ import pandas as pd
 DEFAULT_DATE_FORMAT = "%Y-%m-%d"
 
 DATE_FORMATS = [
-    "%Y-%m-%d",
-    "%d/%m/%Y",
-    "%d.%m.%Y",
-    "%d-%m-%Y",
-    "%Y.%m.%d",
-    "%d %b %Y",
-    "%d %B %Y",
-    "%d %b %Y",  # 08 Nov 2025
-    "%d %B %Y",  # 08 November 2025
+    # ISO
     "%Y-%m-%d",  # 2025-11-08
+    "%Y.%m.%d",  # 2025.11.08
+    "%Y/%m/%d",  # 2025/11/08
+    # European / UK numeric
+    "%d.%m.%Y",  # 11.08.2025
+    "%d.%m.%y",  # 08.11.25
     "%m/%d/%Y",  # 11/08/2025
+    "%d-%m-%y",  # 08-11-25
+    "%d-%m-%Y",  # 08-11-2025
+    "%d/%m/%y",  # 08/11/25
+    "%d/%m/%Y",  # 08/11/2025
+    # Short month name
+    "%d %b %Y",  # 08 Nov 2025
+    "%d-%b-%Y",  # 08-Nov-2025
+    "%d/%b/%Y",  # 08/Nov/2025
+    "%d %b %y",  # 08 Nov 25
+    "%d-%b-%y",  # 08-Nov-25
+    "%d/%b/%y",  # 08/Nov/25
+    # Full month name
+    "%d %B %Y",  # 08 November 2025
+    "%d-%B-%Y",  # 08-November-2025
+    "%d/%B/%Y",  # 08/November/2025
+    "%d %B %y",  # 08 November 25
+    "%d-%B-%y",  # 08-November-25
+    "%d/%B/%y",  # 08/November/25
+    # US
+    "%m-%d-%Y",   # 11-08-2025
+    "%m-%d-%y",   # 11-08-25
+    "%b %d %Y",   # Nov 08 2025
+    "%B %d %Y",   # November 08 2025
+    # US numeric
+    "%m-%d-%Y",
+    "%m-%d-%y",
+    "%m/%d/%Y",
+    "%m/%d/%y",
+    # US Full month name
+    "%B %d %Y",
+    "%B %d %y",
 ]
 
 
