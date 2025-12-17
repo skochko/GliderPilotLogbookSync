@@ -26,8 +26,6 @@ SERVICE_ACCOUNT_FILE = "keys.json"
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 credentials = Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
 
-gc = gspread.authorize(credentials)
-
 print("Load members from Members.xlsx")
 club_members = ClubMembers("Members.xlsx")
 print("Loaded members", len(club_members.members))
@@ -83,7 +81,7 @@ for member in pbar:
     pilot_flights = pilot_flights.sort_values(
         by=["DateFlown", "LaunchTime", "LandTime"], ascending=[True, True, True]
     )
-    pilog_log_book = PilotLogBook(gc, member.spreadsheet_key)
+    pilog_log_book = PilotLogBook(credentials, member.spreadsheet_key)
     count = 0
     for _, row in pilot_flights.iterrows():
     # for _, row in tqdm(pilot_flights.iterrows(), total=len(pilot_flights), desc=f"Sync {member.name}"):
@@ -127,6 +125,8 @@ for member in pbar:
             tqdm.write(
                 f"Save {count} flight log and aircraft models for {member.name} - error ({e})"
             )
+    pilog_log_book.update_filters()
+    pilog_log_book.update_tick_boxes()
     if member.sync_count != rows_count:
         member.sync_count = rows_count
         club_members.save()

@@ -1,17 +1,20 @@
 from datetime import date, datetime
 import os
+import gspread
 import pandas as pd
 from app.helpers import get_date_format, normalize_date, normalize_flight_date, normalize_flight_time
+from googleapiclient.discovery import build
 
 
 LOGBOOK_FIXED_ROWS = os.getenv("LOGBOOK_FIXED_ROWS", 2)
 
 class PilotLogBook:
-    def __init__(self, gc, spreadsheet_key: str):
+    def __init__(self, credentials, spreadsheet_key: str):
         aircraft_model_sheet_name = "Aircraft model"
         flight_log_glider_sheet_name = "FlightLogGlider"
         summary_glider_sheet_name = "Summary Glider"
-        self.gc = gc
+        self.credentials = credentials
+        self.gc = gspread.authorize(credentials)
         self.spreadsheet_key = spreadsheet_key
         self.document = self.gc.open_by_key(spreadsheet_key)
 
@@ -42,9 +45,9 @@ class PilotLogBook:
         self.aircraft_models_to_add_row_index = None
 
         # Flight log glider
-        self.worksheet_flight_gog_glider =self.document.worksheet(flight_log_glider_sheet_name)
+        self.worksheet_flight_log_glider =self.document.worksheet(flight_log_glider_sheet_name)
         self.flight_log_glider = [
-            i for i in self.worksheet_flight_gog_glider.get_all_values() if i[0]
+            i for i in self.worksheet_flight_log_glider.get_all_values() if i[0]
         ]
         self.date_format = get_date_format([i[0] for i in self.flight_log_glider[:10]])
         self.flight_log_id_list = [
@@ -52,7 +55,7 @@ class PilotLogBook:
         ]
         self.flight_log_glider_to_add = []
         self.flight_log_glider_to_add_row_index = max(
-            len(self.worksheet_flight_gog_glider.col_values(1)), LOGBOOK_FIXED_ROWS
+            len(self.worksheet_flight_log_glider.col_values(1)), LOGBOOK_FIXED_ROWS
         ) + 1
 
     def _get_formula(self, key: str, row_index: int):
@@ -164,13 +167,72 @@ class PilotLogBook:
 
     def save_flight_log_glider(self):
         if len(self.flight_log_glider_to_add) > 0:
-            current_rows = self.worksheet_flight_gog_glider.row_count
+            current_rows = self.worksheet_flight_log_glider.row_count
             if current_rows < self.flight_log_glider_to_add_row_index:
-                self.worksheet_flight_gog_glider.add_rows(len(self.flight_log_glider_to_add))
+                self.worksheet_flight_log_glider.add_rows(len(self.flight_log_glider_to_add))
             row_index = self.flight_log_glider_to_add_row_index
-            self.worksheet_flight_gog_glider.update(
+            self.worksheet_flight_log_glider.update(
                 f"A{row_index}:P{row_index + len(self.flight_log_glider_to_add) - 1}",
                 self.flight_log_glider_to_add,
                 value_input_option="USER_ENTERED",
             )
             self.flight_log_glider_to_add = []
+
+    def update_filters(self):
+        rows_count = self.worksheet_flight_log_glider.row_count + len(self.flight_log_glider_to_add)
+        requests = [
+            {
+                "setBasicFilter": {
+                    "filter": {
+                        "range": {
+                            "sheetId": self.worksheet_flight_log_glider.id,
+                            "startRowIndex": 0,
+                            "endRowIndex": rows_count,
+                            "startColumnIndex": 0,
+                            "endColumnIndex": 18
+                        }
+                    }
+                }
+            }
+        ]
+
+        body = {"requests": requests}
+        service = build('sheets', 'v4', credentials=self.credentials)
+        response = service.spreadsheets().batchUpdate(
+            spreadsheetId=self.spreadsheet_key,
+            body=body
+        ).execute()
+
+    def update_tick_boxes(self):
+        rows_count = self.worksheet_flight_log_glider.row_count + len(self.flight_log_glider_to_add)
+        requests = [
+            {
+                "repeatCell": {
+                    "range": {
+                        "sheetId": self.worksheet_flight_log_glider.id,
+                        "startRowIndex": LOGBOOK_FIXED_ROWS,
+                        "endRowIndex": rows_count,
+                        "startColumnIndex": 12,
+                        "endColumnIndex": 13
+                    },
+                    "cell": {
+                        "dataValidation": {
+                            "condition": {
+                                "type": "BOOLEAN"
+                            },
+                            "showCustomUi": True
+                        },
+                        "userEnteredValue": {"boolValue": False}
+                    },
+                    "fields": "dataValidation,userEnteredValue"
+                }
+            }
+        ]
+        body = {
+            'requests': requests
+        }
+        service = build('sheets', 'v4', credentials=self.credentials)
+        response = service.spreadsheets().batchUpdate(
+            spreadsheetId=self.spreadsheet_key,
+            body=body
+        ).execute()
