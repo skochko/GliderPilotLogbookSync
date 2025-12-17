@@ -1,6 +1,7 @@
 from datetime import date, datetime
 import os
 import gspread
+from gspread_formatting import CellFormat, Borders, Border, format_cell_range
 import pandas as pd
 from app.helpers import get_date_format, normalize_date, normalize_flight_date, normalize_flight_time
 from googleapiclient.discovery import build
@@ -236,3 +237,18 @@ class PilotLogBook:
             spreadsheetId=self.spreadsheet_key,
             body=body
         ).execute()
+
+    def update_cell_formating(self):
+        fmt = CellFormat(
+            borders=Borders(
+                top=Border(style='SOLID'),
+                bottom=Border(style='SOLID'),
+                left=Border(style='SOLID'),
+                right=Border(style='SOLID')
+            )
+        )
+        format_cell_range(
+            self.worksheet_flight_log_glider, 
+            f"A1:R{self.worksheet_flight_log_glider.row_count}", 
+            fmt
+        )

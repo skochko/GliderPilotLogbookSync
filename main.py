@@ -127,6 +127,7 @@ for member in pbar:
             )
     pilog_log_book.update_filters()
     pilog_log_book.update_tick_boxes()
+    pilog_log_book.update_cell_formating()
     if member.sync_count != rows_count:
         member.sync_count = rows_count
         club_members.save()
