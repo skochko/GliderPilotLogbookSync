@@ -186,7 +186,7 @@ class PilotLogBook:
                     "filter": {
                         "range": {
                             "sheetId": self.worksheet_flight_log_glider.id,
-                            "startRowIndex": 0,
+                            "startRowIndex": 1,
                             "endRowIndex": rows_count,
                             "startColumnIndex": 0,
                             "endColumnIndex": 18
