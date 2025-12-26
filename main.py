@@ -8,6 +8,7 @@ from app.pilot_logbook import PilotLogBook
 import gspread
 from google.oauth2.service_account import Credentials
 from app.helpers import (
+    SortDirection,
     normalize_date,
     normalize_time,
 )
@@ -77,11 +78,16 @@ for member in pbar:
     rows_count = len(pilot_flights)
     if member.sync_count >= len(pilot_flights):
         break
-    # Sorting by DateFlown, LaunchTime, LandTime
-    pilot_flights = pilot_flights.sort_values(
-        by=["DateFlown", "LaunchTime", "LandTime"], ascending=[True, True, True]
-    )
     pilog_log_book = PilotLogBook(credentials, member.spreadsheet_key)
+    # Sorting by DateFlown, LaunchTime, LandTime
+    if pilog_log_book.sort_direction == SortDirection.NEWEST_LAST:
+        pilot_flights = pilot_flights.sort_values(
+            by=["DateFlown", "LaunchTime", "LandTime"], ascending=[True, True, True]
+        )
+    else:
+        pilot_flights = pilot_flights.sort_values(
+            by=["DateFlown", "LaunchTime", "LandTime"], ascending=[False, False, False]
+        )
     count = 0
     for _, row in pilot_flights.iterrows():
     # for _, row in tqdm(pilot_flights.iterrows(), total=len(pilot_flights), desc=f"Sync {member.name}"):
@@ -125,12 +131,12 @@ for member in pbar:
             tqdm.write(
                 f"Save {count} flight log and aircraft models for {member.name} - error ({e})"
             )
-        try:
-            pilog_log_book.update_filters()
-            pilog_log_book.update_tick_boxes()
-            pilog_log_book.update_cell_formating()
-        except Exception as e:
-            tqdm.write(f"Error update filters and cell formating for {member.name} - {e}")
+    try:
+        pilog_log_book.update_filters()
+        pilog_log_book.update_tick_boxes()
+        pilog_log_book.update_cell_formating()
+    except Exception as e:
+        tqdm.write(f"Error update filters and cell formating for {member.name} - {e}")
     if member.sync_count != rows_count:
         member.sync_count = rows_count
         club_members.save()

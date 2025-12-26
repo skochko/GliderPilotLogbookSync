@@ -1,6 +1,9 @@
 from datetime import datetime, time, date
+import os
 from typing import List, Union
 import pandas as pd
+
+from enum import Enum    
 
 
 DEFAULT_DATE_FORMAT = "%Y-%m-%d"
@@ -46,6 +49,11 @@ DATE_FORMATS = [
     "%B %d %Y",
     "%B %d %y",
 ]
+
+
+class SortDirection(str, Enum):
+    NEWEST_FIRST = "newest_first" 
+    NEWEST_LAST = "newest_last" 
 
 
 def get_date_format(list_values: List[str]) -> str:
@@ -147,3 +155,18 @@ def normalize_time(dt):
 
     # Unexpected type
     raise TypeError(f"normalize_time(): unsupported type {type(dt)} with value {dt}")
+
+
+def get_sort_direction(flight_log_glider: list) -> str:
+    first_date, last_date = None, None
+    for row in flight_log_glider:
+        if first_date is None:
+            first_date = datetime.strptime(row[0], get_date_format([row[0]]))
+        else:
+            last_date = datetime.strptime(row[0], get_date_format([row[0]]))
+        if first_date is not None and last_date is not None and first_date != last_date:
+            if first_date > last_date:
+                return SortDirection.NEWEST_FIRST
+            elif last_date > first_date:
+                return SortDirection.NEWEST_LAST
+    return os.getenv("DEFAULT_SORT_DIRECTION", SortDirection.NEWEST_FIRST)
