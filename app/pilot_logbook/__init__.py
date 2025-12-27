@@ -196,14 +196,21 @@ class PilotLogBook:
         if flight_log_id not in self.flight_log_id_list:
             self.flight_log_glider_to_add.append(data)
             self.flight_log_id_list.append(flight_log_id)
+            print("is_instructor", is_instructor)
             return True
         return False
 
     def save_flight_log_glider(self):
         if len(self.flight_log_glider_to_add) > 0:
-            if self.sort_direction == SortDirection.NEWEST_LAST:
-                current_rows = self.worksheet_flight_log_glider.row_count
-                if current_rows < self.flight_log_glider_to_add_row_index:
+            current_rows = self.worksheet_flight_log_glider.row_count
+            # At this point, we need to decide whether to append new rows to the end of the table or 
+            # insert new rows at the top. However, if the table is empty (contains only headers) and 
+            # we try to insert rows, we get an error.
+            if (
+                self.sort_direction == SortDirection.NEWEST_LAST 
+                or current_rows <= LOGBOOK_FIXED_ROWS
+            ):
+                if current_rows < self.flight_log_glider_to_add_row_index + LOGBOOK_FIXED_ROWS:
                     self.worksheet_flight_log_glider.add_rows(len(self.flight_log_glider_to_add))
                 row_index = self.flight_log_glider_to_add_row_index
             else:
