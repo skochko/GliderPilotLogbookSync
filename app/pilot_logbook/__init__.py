@@ -196,7 +196,6 @@ class PilotLogBook:
         if flight_log_id not in self.flight_log_id_list:
             self.flight_log_glider_to_add.append(data)
             self.flight_log_id_list.append(flight_log_id)
-            print("is_instructor", is_instructor)
             return True
         return False
 
@@ -223,6 +222,7 @@ class PilotLogBook:
                 f"A{row_index}:P{row_index + len(self.flight_log_glider_to_add) - 1}",
                 self.get_parsed_flight_log_glider_to_add(row_index),
                 value_input_option="USER_ENTERED",
+                # value_input_option="RAW",
             )
             self.flight_log_glider_to_add = []
 
@@ -269,10 +269,9 @@ class PilotLogBook:
                                 "type": "BOOLEAN"
                             },
                             "showCustomUi": True
-                        },
-                        "userEnteredValue": {"boolValue": False}
+                        }
                     },
-                    "fields": "dataValidation,userEnteredValue"
+                    "fields": "dataValidation"
                 }
             }
         ]
