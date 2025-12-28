@@ -131,12 +131,12 @@ for member in pbar:
             tqdm.write(
                 f"Save {count} flight log and aircraft models for {member.name} - error ({e})"
             )
-    try:
-        pilog_log_book.update_filters()
-        pilog_log_book.update_tick_boxes()
-        pilog_log_book.update_cell_formating()
-    except Exception as e:
-        tqdm.write(f"Error update filters and cell formating for {member.name} - {e}")
+        try:
+            pilog_log_book.update_filters()
+            pilog_log_book.update_tick_boxes()
+            pilog_log_book.update_cell_formating()
+        except Exception as e:
+            tqdm.write(f"Error update filters and cell formating for {member.name} - {e}")
     if member.sync_count != rows_count:
         member.sync_count = rows_count
         club_members.save()
